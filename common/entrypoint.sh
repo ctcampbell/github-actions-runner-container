@@ -5,6 +5,11 @@ function error {
     echo "Error; $1"
 }
 
+function cleanup {
+    echo "Removing GitHub Actions Runner"
+    ./config.sh remove --token "${TOKEN}"
+}
+
 function getRegistrationToken {
     if [[ -z GITHUB_TOKEN ]]; then
         error "A GITHUB_TOKEN environment variable is required to register the actions runner with the repository or organization."
@@ -72,6 +77,14 @@ fi
 # The runner group that the self-hosted runner will be registered with
 GROUP=${RUNNER_GROUP:-"default"}
 
+if [[ -z $GITHUB_TOKEN ]]; then
+  echo "Using GitHub token from /run/secrets/github-token"
+  GITHUB_TOKEN=$(cat /run/secrets/github-token)
+else
+  echo $GITHUB_TOKEN
+  echo "Using GitHub token from GITHUB_TOKEN environment variable"
+fi
+
 echo "Getting temporary access token for registering"
 getRegistrationToken
 
@@ -83,12 +96,13 @@ echo "Configuring GitHub Actions Runner and registering"
     --name "${RUNNER_NAME}" \
     --work ${RUNNER_WORK_DIRECTORY} \
     --runnergroup ${GROUP} \
+    --ephemeral \
     $OPTIONS
 
 echo "Starting GitHub Actions Runner"
-env -i ./runsvc.sh
-
-# Deregister
-echo Cleaning up runner registration...
-getRegistrationToken
-./config.sh remove --token "${TOKEN}"
+trap 'kill -TERM $PID ; cleanup' TERM INT
+./bin/runsvc.sh &
+PID=$!
+wait $PID
+wait $PID
+EXIT_STATUS=$?

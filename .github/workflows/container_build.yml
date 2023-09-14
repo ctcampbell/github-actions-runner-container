@@ -8,11 +8,11 @@ on:
       runner_version:
         description: 'Runner version'
         required: true
-        default: '2.287.1'
+        default: '2.309.0'
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
@@ -20,22 +20,24 @@ jobs:
         - ubuntu
         - debian
         - redhat-ubi8
+      fail-fast: false
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        
+        uses: actions/checkout@v4
+
       - name: Container Metadata
         id: container_metadata
-        uses: actions/github-script@v4
-        with:
-          script: |
-            core.setOutput('container_tag', `${context.repo.owner}/${{ matrix.os }}-actions-runner:${context.sha}`);
-            core.setOutput('datetime', new Date().toISOString());
+        run: |
+          echo "container_name=${{ github.repository }}/${{ matrix.os }}-actions-runner" >> "$GITHUB_OUTPUT"
+          echo "container_tag=${{ github.repository }}/${{ matrix.os }}-actions-runner:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "datetime=$(date -Im)" >> "$GITHUB_OUTPUT"
       
       - name: Build Container
         run: |
-          docker build -f ${{ matrix.os }}-actions-runner/Dockerfile -t ghcr.io/${{ steps.container_metadata.outputs.container_tag }} \
+          docker build -q -f ${{ matrix.os }}-actions-runner/Dockerfile \
+            -t ghcr.io/${{ steps.container_metadata.outputs.container_tag }} \
+            -t ghcr.io/${{ steps.container_metadata.outputs.container_name }}:latest \
             --build-arg COMMIT_SHA=${{ github.sha }} \
             --build-arg CREATED="${{ steps.container_metadata.outputs.datetime }}" \
             --build-arg GH_RUNNER_VERSION="${{ github.event.inputs.runner_version }}" \
@@ -43,7 +45,7 @@ jobs:
         shell: bash
       
       - name: Login GHCR.io
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -51,4 +53,4 @@ jobs:
           
       - name: Publish
         run: | 
-          docker push ghcr.io/${{ steps.container_metadata.outputs.container_tag }}
+          docker push -q -a ghcr.io/${{ steps.container_metadata.outputs.container_name }}

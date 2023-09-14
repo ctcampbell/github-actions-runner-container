@@ -7,8 +7,8 @@ FROM $BASE
 # You would typically obtain this latest version from an API endpoint and use that for the runner version
 # as the runner will self update to the latest version when it gets its first job.
 # The reason this is specified is so that we can test the upgrade scenarios using this Dockerfile.
-ARG GH_RUNNER_VERSION=2.286.1
-
+ARG GH_RUNNER_VERSION=2.309.0
+ARG USER=runner
 ARG COMMIT_SHA=master
 ARG CREATED=""
 
@@ -19,7 +19,7 @@ ENV RUNNER_LABELS=""
 ENV RUNNER_OPTIONS=""
 ENV RUNNER_WORK_DIRECTORY="_work"
 ENV RUNNER_ALLOW_RUNASROOT=false
-ENV AGENT_TOOLS_DIRECTORY=/opt/hostedtoolcache
+ENV AGENT_TOOLS_DIRECTORY=/home/${USER}/_work/_tool
 
 # Fill in your labels as appropriate here
 LABEL \
@@ -38,9 +38,9 @@ LABEL \
     github_actions_version=$GH_RUNNER_VERSION
 
 # Create a user for running actions
-RUN useradd -m actions
-RUN mkdir -p /home/actions ${AGENT_TOOLS_DIRECTORY}
-WORKDIR /home/actions
+RUN useradd -m ${USER}
+RUN mkdir -p /home/${USER} ${AGENT_TOOLS_DIRECTORY}
+WORKDIR /home/${USER}
 
 # jq is used by the runner to extract the token when registering the runner
 RUN curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz \
@@ -50,14 +50,11 @@ RUN curl -L -O https://github.com/actions/runner/releases/download/v${GH_RUNNER_
     && yum install jq git -y \
     && yum clean all
 
-# Copy out the runsvc.sh script to the root directory for running the service
-RUN cp bin/runsvc.sh . && chmod +x ./runsvc.sh
-
 COPY common/entrypoint.sh .
 RUN chmod +x ./entrypoint.sh
 
 # Now that the OS has been updated to include required packages, update ownership and then switch to actions user
-RUN chown -R actions:actions /home/actions ${AGENT_TOOLS_DIRECTORY}
+RUN chown -R ${USER}:${USER} /home/${USER} ${AGENT_TOOLS_DIRECTORY}
 
-USER actions
+USER ${USER}
 CMD [ "./entrypoint.sh" ]
