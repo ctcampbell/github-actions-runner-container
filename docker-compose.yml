@@ -2,11 +2,11 @@ version: '3.3'
 services:
   actions-runner:
     environment:
-      - RUNNER_ORGANIZATION_URL=https://github.com/od-ctcampbell
+      - RUNNER_REPOSITORY_URL=https://github.com/ctcampbell/github-actions-runner-container
     secrets:
       - github-token
     volumes:
-      - ./Data/_work/_tool:/home/actions/_work/_tool
+      - ./Data/_work/_tool:/home/runner/_work/_tool
     image: ghcr.io/ctcampbell/github-actions-runner-container/ubuntu-actions-runner
     pull_policy: always
 secrets:
