@@ -18,9 +18,9 @@ You can build this container using the following command:
 $ docker build -f [debian-actions-runner|ubuntu-actions-runner|etc.]/Dockerfile -t <container_tag> .
 ```
 
-There are some configurable Build Arguments that you can pass in to modify the container build:
+There are some configurable build arguments that you can pass in to modify the container build:
 
-* `BASE`: default value `centos:8` or `ubuntu-20.04` depending on the variant, but can be modified to specify an alternative base container image to start from
+* `BASE`: default value depends on the variant, but can be modified to specify an alternative base container image to start from
 * `GH_RUNNER_VERSION`: default value `2.309.0` but can be used to specify an alternative version of the GitHub Actions runner
 * `USER`: default value `runner`
 
