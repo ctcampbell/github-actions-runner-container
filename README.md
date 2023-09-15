@@ -6,7 +6,7 @@ This project will build a Docker container with the specified version of the Git
 - RedHat UBI
 - Debian
 
-The container will run as an ephemeral runner, which is deregistered after a single job has completed.
+The container will run as an ephemeral runner, which is deregistered after a single job has completed. You could use this container to spin up short lived runners in response to GitHub sending a webhook when an Actions job is queued.
 
 The container is configured with a `CMD` start point which runs registration, the runner service, and deregistration. As this is not an `ENTRYPOINT` the container is also suitable for use in [Actions Runner Controller](https://github.com/actions/actions-runner-controller/tree/master).
 
