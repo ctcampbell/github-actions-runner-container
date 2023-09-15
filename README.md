@@ -79,3 +79,6 @@ The token needs to be provided as the environment variable `GITHUB_TOKEN`.
       -e GITHUB_TOKEN=<PAT_token_with_repo access> \
       <container_name>
     ```
+### Populating the runner tool cache
+
+You can mount a pre-populated tool cache volume or bind mount to `/home/runner/_work/_tool` and this will be picked up by any Actions that cache their associated binaries. See [the docs](https://docs.github.com/en/enterprise-server@3.10/admin/github-actions/managing-access-to-actions-from-githubcom/setting-up-the-tool-cache-on-self-hosted-runners-without-internet-access) for advice on how to create this cache.
