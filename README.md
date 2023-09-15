@@ -1,28 +1,28 @@
 # Docker Container for GitHub Actions Runner
 
-[![awesome-runners](https://img.shields.io/badge/listed%20on-awesome--runners-blue.svg)](https://github.com/jonico/awesome-runners)
+This project will build a Docker container with the specified version of the GitHub Actions Runner installed into it. Images are built for:
 
-This project will build a Docker container with the specified version of the GitHub Actions Runner installed into it. It is built off of CentOS 8 as a base by default.
+- Ubuntu
+- RedHat UBI
+- Debian
 
-## Building Container
+The container will run as an ephemeral runner, which is deregistered after a single job has completed.
+
+## Building the container
+
 You can build this container using the following command:
 
 ```bash
-$ docker build -f [centos-actions-runner|ubuntu-actions-runner]/Dockerfile -t <container_tag> .
+$ docker build -f [debian-actions-runner|ubuntu-actions-runner|etc.]/Dockerfile -t <container_tag> .
 ```
 
 There are some configurable Build Arguments that you can pass in to modify the container build:
 
 * `BASE`: default value `centos:8` or `ubuntu-20.04` depending on the variant, but can be modified to specify an alternative base container image to start from
-* `GH_RUNNER_VERSION`: default value '2.273.0' but can be used to specify an alternative version of the GitHub Actions runner
+* `GH_RUNNER_VERSION`: default value '2.309.0' but can be used to specify an alternative version of the GitHub Actions runner
+* `USER`: default value `runner`
 
-The Dockerfile has two lines that are hardcoded to use `yum` so you will have to ensure that you use a base container that supports yum if you change it.
-
-The GitHub Actions Runner will update itself to the latest version when it gets the first job sent to it if it is running an out of date version. The purpose of this parameter is to be able to set it to a value to test this upgrade scenario.
-A future version of this will access the releases endpoint to get the latest version and use that.
-
-
-## Running the Container
+## Running the container
 
 The container image supports a number of environment variables that you can pass to the container to control the registration of the self hosted runner with GitHub.
 
@@ -42,8 +42,7 @@ A GitHub Personal Access Token is required so that it can be used to obtain a sh
 
 The token needs to be provided as the environment variable `GITHUB_TOKEN`.
 
-
-Optional environment variables:
+### Optional environment variables:
 
 * `GITHUB_SERVER`: The url for GHES server (if not connecting to `github.com`)
 * `RUNNER_NAME`: The name for the runner, must be unique if not specified will use the hostname of the container.
